@@ -1,0 +1,28 @@
+User:
+1) Quote Request Option
+2) Select any Proposal
+
+Owner:
+1) Register as supplier Option
+2) Send Proposal to Quote Requests
+
+Admin:
+1) functionalty of registering hotels as supplier
+2) View all bookings
+
+Database:
+
+Table: quote_requests
+    user_id
+    deadline
+    document
+    created_at
+    updated_at
+
+Table: suppliers
+    owner_id
+    title
+    approved
+    document_name
+    created_at
+    updated_at

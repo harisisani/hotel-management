@@ -91,6 +91,13 @@
                     </div>
                 </li>
 
+                <li class="sidebar-menu-item {{ menuActive('owner.quote_request.quote') }}">
+                    <a href="{{ route('owner.quote_request.quote') }}" class="nav-link ">
+                        <i class="menu-icon las la-user"></i>
+                        <span class="menu-title">@lang('Quote Requests')</span>
+                    </a>
+                </li>
+
                 <li class="sidebar-menu-item {{ menuActive('owner.profile') }}">
                     <a href="{{ route('owner.profile') }}" class="nav-link ">
                         <i class="menu-icon las la-user"></i>
