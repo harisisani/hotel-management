@@ -1,23 +1,23 @@
-# name: auto deployment on cpanel
+name: auto deployment on cpanel
 
-# on:
-#   push:
-#     branches: [main]
+on:
+  push:
+    branches: [main]
 
-# jobs:
+jobs:
 
-#   FTP-Deploy-Action:
-#     name: FTP-Deploy-Action
-#     runs-on: ubuntu-latest
-#     steps:
-#       - uses: actions/checkout@v2.1.0
-#         with:
-#           fetch-depth: 2
-#       - name: FTP-Deploy-Action
-#         uses: SamKirkland/FTP-Deploy-Action@4.0.0
-#         with:
-#           server: 154.29.74.233
-#           username: emphospitality
-#           password: OBRd36zh6vHF9eaz
-#           local-dir: ./core/resources/
-#           server-dir: /home/emphospitality/web/booking.emphospitality.com/public_html/core/resources/
+  FTP-Deploy-Action:
+    name: FTP-Deploy-Action
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.1.0
+        with:
+          fetch-depth: 2
+      - name: FTP-Deploy-Action
+        uses: SamKirkland/FTP-Deploy-Action@4.0.0
+        with:
+          server: 154.29.74.233
+          username: emphospitality
+          password: OBRd36zh6vHF9eaz
+          local-dir: ./core/resources/views/owner/quote_request/
+          server-dir: /home/emphospitality/web/booking.emphospitality.com/public_html/core/resources/views/owner/quote_request/

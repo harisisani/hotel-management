@@ -1,7 +1,7 @@
 @extends('owner.layouts.app')
 
 <?php echo 'testing';?>
-{{-- @section('panel')
+@section('panel')
 
     <div class="row mb-none-30">
         <div class="col-xl-3 col-lg-4 col-md-5 mb-30">
@@ -114,4 +114,4 @@
 
 @push('breadcrumb-plugins')
     <a href="{{ route('owner.change.password') }}" class="btn btn-sm btn--primary box--shadow1 text--small" ><i class="fa fa-key"></i>@lang('Change Password')</a>
-@endpush --}}
+@endpush
