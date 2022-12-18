@@ -19,4 +19,4 @@ jobs:
           server: 154.29.74.233
           username: emphospitality
           password: OBRd36zh6vHF9eaz
-          local-dir: /home/emphospitality/web/booking.emphospitality.com/public_html/
+          local-dir: /emphospitality/web/booking.emphospitality.com/public_html/
