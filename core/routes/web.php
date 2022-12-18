@@ -407,6 +407,8 @@ Route::namespace('Owner')->prefix('owner')->name('owner.')->group(function(){
             Route::get('change-password', 'OwnerController@changePassword')->name('change.password');
             Route::post('change-password', 'OwnerController@submitPassword');
 
+            Route::get('profile', 'OwnerController@profile')->name('profile');
+
             //2FA
             Route::get('twofactor', 'OwnerController@show2faForm')->name('twofactor');
             Route::post('twofactor/enable', 'OwnerController@create2fa')->name('twofactor.enable');
@@ -443,6 +445,10 @@ Route::namespace('Owner')->prefix('owner')->name('owner.')->group(function(){
                 Route::post('/reply/{ticket}', 'TicketController@replyTicket')->name('ticket.reply');
                 Route::get('/download/{ticket}', 'TicketController@ticketDownload')->name('ticket.download');
             });
+
+            Route::get('/quoterequest', 'OwnerController@quoteRequest')->name('quote_request.quote');
+
+
         });
 
     });

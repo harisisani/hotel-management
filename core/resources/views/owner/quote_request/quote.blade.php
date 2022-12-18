@@ -1,6 +1,7 @@
 @extends('owner.layouts.app')
 
-@section('panel')
+<?php echo 'testing';?>
+{{-- @section('panel')
 
     <div class="row mb-none-30">
         <div class="col-xl-3 col-lg-4 col-md-5 mb-30">
@@ -91,14 +92,14 @@
                                     <input class="form-control" type="text" name="city" value="{{ @$owner->address->city }}" >
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label class="form-control-label  font-weight-bold">@lang('Country')</label>
                                     <input class="form-control" type="text" name="country" value="{{ @$owner->address->country }}" disabled>
                                 </div>
                             </div>
-                            
+
                             </div>
                         </div>
                         <div class="form-group">
@@ -113,4 +114,4 @@
 
 @push('breadcrumb-plugins')
     <a href="{{ route('owner.change.password') }}" class="btn btn-sm btn--primary box--shadow1 text--small" ><i class="fa fa-key"></i>@lang('Change Password')</a>
-@endpush
+@endpush --}}

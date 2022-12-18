@@ -61,7 +61,7 @@ class OwnerController extends Controller
 
         $owner->firstname= $request->firstname;
         $owner->lastname= $request->lastname;
-      
+
 
         $in['address'] = [
             'address' => $request->address,
@@ -97,7 +97,7 @@ class OwnerController extends Controller
             'current_password' => 'required',
             'password' => ['required','confirmed',$password_validation]
         ]);
-        
+
 
         try {
             $owner = auth()->guard('owner')->user();
@@ -272,14 +272,14 @@ class OwnerController extends Controller
         }
 
         $this->validate($request, $rules);
-        
+
         $owner = Auth::guard('owner')->user();
         if ($owner->ts) {
             $response = verifyG2fa($owner,$request->authenticator_code);
             if (!$response) {
                 $notify[] = ['error', 'Wrong verification code'];
                 return back()->withNotify($notify);
-            }   
+            }
         }
 
 
@@ -371,5 +371,12 @@ class OwnerController extends Controller
         $withdraws = Withdrawal::where('owner_id', Auth::guard('owner')->id())->where('status', '!=', 0)->with('method')->orderBy('id','desc')->paginate(getPaginate());
         $data['emptyMessage'] = "No Data Found!";
         return view('owner.withdraw.log', compact('pageTitle', 'emptyMessage', 'withdraws'));
+    }
+
+    public function quoteRequest()
+    {
+        $pageTitle = "Quote Request";
+        $emptyMessage = "No withdraw history found";
+        return view('owner.quote_request.quote', compact('pageTitle', 'emptyMessage'));
     }
 }
