@@ -91,15 +91,18 @@
                                     <input class="form-control" type="text" name="city" value="{{ @$owner->address->city }}" >
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label class="form-control-label  font-weight-bold">@lang('Country')</label>
                                     <input class="form-control" type="text" name="country" value="{{ @$owner->address->country }}" disabled>
                                 </div>
                             </div>
-                            
+
                             </div>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn--primary btn-block btn-lg">@lang('Save Changes')</button>
                         </div>
                         <div class="form-group">
                             <button type="submit" class="btn btn--primary btn-block btn-lg">@lang('Save Changes')</button>
