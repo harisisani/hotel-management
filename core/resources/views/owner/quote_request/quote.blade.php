@@ -1,6 +1,4 @@
 @extends('owner.layouts.app')
-
-<?php echo 'testing';?>
 @section('panel')
 
     <div class="row mb-none-30">
