@@ -1,6 +1,5 @@
 @extends('owner.layouts.app')
 @section('panel')
-
     <div class="row mb-none-30">
         <div class="col-xl-3 col-lg-4 col-md-5 mb-30">
             <div class="card b-radius--5 overflow-hidden">
