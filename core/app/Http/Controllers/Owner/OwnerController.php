@@ -184,7 +184,6 @@ class OwnerController extends Controller
         return back()->withNotify($notify);
     }
 
-
      /*
      * Withdraw Operation
      */
@@ -371,12 +370,5 @@ class OwnerController extends Controller
         $withdraws = Withdrawal::where('owner_id', Auth::guard('owner')->id())->where('status', '!=', 0)->with('method')->orderBy('id','desc')->paginate(getPaginate());
         $data['emptyMessage'] = "No Data Found!";
         return view('owner.withdraw.log', compact('pageTitle', 'emptyMessage', 'withdraws'));
-    }
-
-    public function quoteRequest()
-    {
-        $pageTitle = "Quote Request";
-        $emptyMessage = "No withdraw history found";
-        return view('owner.quote_request.quote', compact('pageTitle', 'emptyMessage'));
     }
 }

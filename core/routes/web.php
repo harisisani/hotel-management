@@ -446,8 +446,8 @@ Route::namespace('Owner')->prefix('owner')->name('owner.')->group(function(){
                 Route::get('/download/{ticket}', 'TicketController@ticketDownload')->name('ticket.download');
             });
 
-            Route::get('/quoterequest', 'OwnerController@quoteRequest')->name('quote_request.quote');
-
+            Route::get('/quoterequest', 'QuoteRequestController@quoteRequest')->name('quote_request.quote');
+            Route::post('quoterequest', 'QuoteRequestController@supplierRequest')->name('supplier.request');
 
         });
 

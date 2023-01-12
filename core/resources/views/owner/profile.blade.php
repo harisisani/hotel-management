@@ -34,7 +34,6 @@
                 </div>
             </div>
         </div>
-
         <div class="col-xl-9 col-lg-8 col-md-7 mb-30">
             <div class="card">
                 <div class="card-body">

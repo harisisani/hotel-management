@@ -4,7 +4,8 @@ User:
 
 Owner:
 1) Register as supplier Option
-2) Send Proposal to Quote Requests
+2) See Quote Requests
+3) Send Proposal to Quote Requests
 
 Admin:
 1) functionalty of registering hotels as supplier
@@ -13,16 +14,27 @@ Admin:
 Database:
 
 Table: quote_requests
-    user_id
-    deadline
-    document
+    id
+    created_by_user_id
+    quote_title
+    quote_deadline
+    quote_document
     created_at
     updated_at
 
 Table: suppliers
+    id
     owner_id
-    title
-    approved
+    request_title
+    approval_status
+    request_message
+    created_at
+    updated_at
+
+Table: busines_documents
+    id
+    owner_id
+    document_title
     document_name
     created_at
     updated_at
