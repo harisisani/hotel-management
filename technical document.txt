@@ -14,6 +14,7 @@ Admin:
 Database:
 
 Table: quote_requests
+Model: QuoteRequests
     id
     created_by_user_id
     quote_title
@@ -22,7 +23,18 @@ Table: quote_requests
     created_at
     updated_at
 
+Table: quote_proposals
+Model: QuoteProposals
+    id
+    owner_id
+    quote_id
+    proposal_message
+    created_at
+    updated_at
+
+
 Table: suppliers
+Model: Suppliers
     id
     owner_id
     request_title
@@ -32,9 +44,11 @@ Table: suppliers
     updated_at
 
 Table: busines_documents
+Model: OwnerDocuments
     id
     owner_id
     document_title
     document_name
     created_at
     updated_at
+
