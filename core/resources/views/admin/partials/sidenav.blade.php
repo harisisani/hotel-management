@@ -444,8 +444,13 @@
                         <span class="menu-title">@lang('Subscribers') </span>
                     </a>
                 </li>
-
-
+                <li class="sidebar-menu-item  {{menuActive('admin.supplier.index')}}">
+                    <a href="{{route('admin.supplier.index')}}" class="nav-link"
+                       data-default-url="{{ route('admin.supplier.index') }}">
+                        <i class="menu-icon las la-expand-arrows-alt"></i>
+                        <span class="menu-title">@lang('Suppliers') </span>
+                    </a>
+                </li>
                 <li class="sidebar__menu-header">@lang('Settings')</li>
 
                 <li class="sidebar-menu-item {{menuActive('admin.setting.index')}}">

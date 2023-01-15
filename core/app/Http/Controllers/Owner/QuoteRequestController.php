@@ -199,8 +199,9 @@ class QuoteRequestController extends Controller
         $OwnerDocuments = OwnerDocuments::where('owner_id', $ownerId)->get();
         $supplierRequests = Suppliers::where('owner_id', $ownerId)->get();
         $supplierApproved = Suppliers::where('owner_id', $ownerId)->where('approval_status', 'Active')->get();
+        $supplierDeactivated = Suppliers::where('owner_id', $ownerId)->where('approval_status', 'Deactivate')->get();
         // $OwnerDocuments = OwnerDocuments::get();
-        return view('owner.quote_request.quote', compact('pageTitle', 'owner','OwnerDocuments','supplierRequests','supplierApproved'));
+        return view('owner.quote_request.quote', compact('pageTitle', 'owner','OwnerDocuments','supplierRequests','supplierApproved','supplierDeactivated'));
     }
 
 

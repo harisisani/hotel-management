@@ -69,7 +69,7 @@ Route::namespace('Admin')->prefix('admin')->name('admin.')->group(function () {
         Route::post('password/reset/change', 'ResetPasswordController@reset')->name('password.change');
     });
 
-    Route::middleware('admin')->group(function () {
+    Route::middleware('admin')->group(function () { 
         Route::get('dashboard', 'AdminController@dashboard')->name('dashboard');
         Route::get('profile', 'AdminController@profile')->name('profile');
         Route::post('profile', 'AdminController@profileUpdate')->name('profile.update');
@@ -188,7 +188,13 @@ Route::namespace('Admin')->prefix('admin')->name('admin.')->group(function () {
         Route::get('subscriber/send-email', 'SubscriberController@sendEmailForm')->name('subscriber.sendEmail');
         Route::post('subscriber/remove', 'SubscriberController@remove')->name('subscriber.remove');
         Route::post('subscriber/send-email', 'SubscriberController@sendEmail')->name('subscriber.sendEmail');
-
+        
+        //Suppliers
+        Route::get('supplier', 'SupplierController@index')->name('supplier.index');
+        Route::get('supplier/active/{requestId}', 'SupplierController@activeThis')->name('supplier.activeThis');
+        Route::get('supplier/deactive/{requestId}', 'SupplierController@deactiveThis')->name('supplier.deactiveThis');
+        Route::get('supplier/approve/{requestId}', 'SupplierController@approveThis')->name('supplier.approveThis');
+        Route::get('supplier/reject/{requestId}', 'SupplierController@rejectThis')->name('supplier.rejectThis');
 
         // Deposit Gateway
         Route::name('gateway.')->prefix('gateway')->group(function(){
