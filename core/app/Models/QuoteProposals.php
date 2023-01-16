@@ -7,9 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class QuoteProposals extends Model
 {
 
-    protected $table = "quote_requests";
+    protected $table = "quote_proposals";
     protected $fillable = [
-        'owner_id', 'quote_id', 'proposal_message'
+        'owner_id', 'quote_id', 'proposal_message','proposal_document'
     ];
 
 }

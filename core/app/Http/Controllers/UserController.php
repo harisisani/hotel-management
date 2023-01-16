@@ -7,6 +7,7 @@ use App\Models\GeneralSetting;
 use App\Models\Property;
 use App\Models\BookedProperty;
 use App\Models\Review;
+use App\Models\QuoteRequests;
 use App\Models\SupportTicket;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -263,6 +264,43 @@ class UserController extends Controller
             $notify[] = ['success', 'Two factor authenticator disable successfully'];
         } else {
             $notify[] = ['error', 'Wrong verification code'];
+        }
+        return back()->withNotify($notify);
+    }
+
+    //Quote Request Module
+    function user_quote_request(){
+        $pageTitle = "Quote Requests";
+        $emptyMessage = 'No quote requests found';
+        $user = Auth::guard('owner')->user();
+        return view($this->activeTemplate.'user.quote_request.index', compact('pageTitle','emptyMessage','user'));
+    }
+
+    function user_quote_request_create(Request $request){
+        $this->validate($request, [
+            'quote_document' => 'required',
+            'quote_title' => 'required',
+            'quote_deadline' => 'required',
+        ]);
+        if($request->hasFile('quote_document'))
+        {
+            $user = auth()->user()->id;
+            $file = $request->file('quote_document');
+            $extention = $file->getClientOriginalExtension();
+            $filename = '_'.time().'.'.$extention;
+            $folder = 'quote-files/';
+            $file->move('uploads/'.$folder, $filename);
+            $quote = new QuoteRequests;
+            // Assign values to the model's attributes using the request data
+            $quote->created_by_user_id = $user;
+            $quote->quote_title = $request->input('quote_title');
+            $quote->quote_deadline = $request->input('quote_deadline');
+            $quote->quote_document = $filename;
+            // Save the model to the database
+            $quote->save();
+            $notify[] = ['success', 'Quote Request Created Successfully'];
+        }else{
+            $notify[] = ['error','Document upload failed'];
         }
         return back()->withNotify($notify);
     }

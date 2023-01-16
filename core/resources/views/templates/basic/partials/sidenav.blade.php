@@ -12,6 +12,9 @@
           <li class="{{ menuActive(['user.review', 'user.review.pending', 'user.review.complete']) }}">
             <a href="{{ route('user.review') }}"><i class="lar la-star"></i> <span>@lang('Reviews')</span></a>
           </li>
+          <li class="{{ menuActive(['user.quote_request']) }}">
+            <a href="{{ route('user.quote_request') }}"><i class="las la-money-check-alt"></i> <span>@lang('Quote Requests')</span></a>
+          </li>
           <li class="{{ menuActive(['ticket', 'ticket.view', 'ticket.open']) }}">
             <a href="{{ route('ticket') }}"><i class="las la-cog"></i> <span>@lang('Support Tickets')</span></a>
           </li>

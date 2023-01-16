@@ -13,8 +13,10 @@
                             <tr>
                                 <th>@lang('Owner Id')</th>
                                 <th>@lang('Requested By')</th>
+                                <th>@lang('Documents')</th>
                                 <th>@lang('Status')</th>
                                 <th>@lang('Created Date')</th>
+                                <th>@lang('View Details')</th>
                                 <th>@lang('Action')</th>
                             </tr>
                             </thead>
@@ -23,8 +25,20 @@
                                 <tr>
                                     <td>{{ $supplier->owner_id }}</td>
                                     <td>{{ $supplier->request_title }}</td>
+                                    <td style="text-align: left">
+                                        <?foreach($businessDocuments as $value){
+                                        if($value['owner_id']==$supplier->owner_id ){
+                                        ?>
+                                            <br/><a target="_blank" href="https://booking.emphospitality.com/uploads/owner-files/<?=$supplier->owner_id?>/<?=$value['document_name']?>"><i class="fa fa-download">&emsp;<?=$value['document_title']?></i></a>
+                                        <?}}?>
+                                    </td>
                                     <td>{{ $supplier->approval_status }}</td>
                                     <td>{{ showDateTime($supplier->created_at) }}</td>
+                                    <td data-label="@lang('Action')">
+                                        <a href="{{ route('admin.owners.detail', $supplier->owner_id) }}" class="icon-btn" data-toggle="tooltip" title="" data-original-title="@lang('Details')">
+                                            <i class="las la-desktop text--shadow"></i>
+                                        </a>
+                                    </td>
                                     <td data-label="@lang('Action')">
                                         <? if ($supplier->approval_status=="Deactivate") {?>
                                         <a href="{{ route('admin.supplier.activeThis', ['requestId' => $supplier->id]) }}"
@@ -66,9 +80,11 @@
                             <tr>
                                 <th>@lang('Owner Id')</th>
                                 <th>@lang('Requested By')</th>
+                                <th>@lang('Documents')</th>
                                 <th>@lang('Requested Message')</th>
                                 <th>@lang('Status')</th>
                                 <th>@lang('Created Date')</th>
+                                <th>@lang('View Details')</th>
                                 <th>@lang('Action')</th>
                             </tr>
                             </thead>
@@ -78,9 +94,21 @@
                                 <tr>
                                     <td>{{ $supplier->owner_id }}</td>
                                     <td>{{ $supplier->request_title }}</td>
+                                    <td style="text-align: left">
+                                        <?foreach($businessDocuments as $value){
+                                        if($value['owner_id']==$supplier->owner_id ){
+                                        ?>
+                                            <br/><a target="_blank" href="https://booking.emphospitality.com/uploads/owner-files/<?=$supplier->owner_id?>/<?=$value['document_name']?>"><i class="fa fa-download">&emsp;<?=$value['document_title']?></i></a>
+                                        <?}}?>
+                                    </td>
                                     <td>{{ $supplier->request_message }}</td>
                                     <td>{{ $supplier->approval_status }}</td>
                                     <td>{{ showDateTime($supplier->created_at) }}</td>
+                                    <td data-label="@lang('Action')">
+                                        <a href="{{ route('admin.owners.detail', $supplier->owner_id) }}" class="icon-btn" data-toggle="tooltip" title="" data-original-title="@lang('Details')">
+                                            <i class="las la-desktop text--shadow"></i>
+                                        </a>
+                                    </td>
                                     <td data-label="@lang('Action')">
                                         <a href="{{ route('admin.supplier.approveThis', ['requestId' => $supplier->id]) }}"
                                            class="icon-btn btn--success ml-1 removeModalBtn">Approve

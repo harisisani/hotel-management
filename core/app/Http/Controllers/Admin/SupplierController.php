@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Suppliers;
 use Illuminate\Http\Request;
-
+use App\Models\OwnerDocuments;
 class SupplierController extends Controller
 {
     public function index()
@@ -22,7 +22,9 @@ class SupplierController extends Controller
         ->orWhere('approval_status','Rejected')
         // ->orWhere('approval_status','Expired')
         ->get();
-        return view('admin.supplier.index', compact('pageTitle', 'suppliersApproved','suppliersRequested'));
+
+        $businessDocuments = OwnerDocuments::get();
+        return view('admin.supplier.index', compact('pageTitle', 'suppliersApproved','suppliersRequested','businessDocuments'));
     }
 
     public function activeThis(Request $request){

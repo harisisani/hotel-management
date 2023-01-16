@@ -527,6 +527,9 @@ Route::name('user.')->prefix('user')->group(function () {
 
             Route::post('property/booking', 'PropertyController@bookingProcess')->name('property.booking');
 
+            //Quote Requests
+            Route::get('quote_request', 'UserController@user_quote_request')->name('quote_request');
+            Route::post('quote_request/create', 'UserController@user_quote_request_create')->name('quote.request.create');
         });
     });
 });
