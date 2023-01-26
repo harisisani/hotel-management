@@ -8,12 +8,13 @@ use App\Models\Property;
 use App\Models\BookedProperty;
 use App\Models\Review;
 use App\Models\QuoteRequests;
+use App\Models\QuoteProposals;
 use App\Models\SupportTicket;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
-
+use Illuminate\Support\Facades\DB;
 class UserController extends Controller
 {
     public function __construct()
@@ -273,7 +274,11 @@ class UserController extends Controller
         $pageTitle = "Quote Requests";
         $emptyMessage = 'No quote requests found';
         $user = Auth::guard('owner')->user();
-        return view($this->activeTemplate.'user.quote_request.index', compact('pageTitle','emptyMessage','user'));
+        $userId = auth()->user()->id;
+        $QuoteRequests = QuoteRequests::where('created_by_user_id', $userId)->where('deleted', 0)->orderBy('created_at', 'desc')->get();
+        $QuoteProposals = QuoteProposals::where('deleted', 0)->orderBy('created_at', 'asc')->get();
+        $owners = DB::select('select * from owners');
+        return view($this->activeTemplate.'user.quote_request.index', compact('owners','pageTitle','emptyMessage','user','QuoteRequests','QuoteProposals'));
     }
 
     function user_quote_request_create(Request $request){
@@ -294,7 +299,8 @@ class UserController extends Controller
             // Assign values to the model's attributes using the request data
             $quote->created_by_user_id = $user;
             $quote->quote_title = $request->input('quote_title');
-            $quote->quote_deadline = $request->input('quote_deadline');
+            $quote->quote_deadline = $request->input('quote_deadline'); 
+            $quote->quote_status = 'Active';
             $quote->quote_document = $filename;
             // Save the model to the database
             $quote->save();
@@ -302,6 +308,22 @@ class UserController extends Controller
         }else{
             $notify[] = ['error','Document upload failed'];
         }
+        return back()->withNotify($notify);
+    }
+
+    public function acceptThis(Request $request){
+        $proposalId = $request->route('proposalId');
+        QuoteProposals::where('id',$proposalId)
+        ->update(['proposal_status' => "Accepted"]);
+        $notify[] = ['success',"Proposal Approved"];
+        return back()->withNotify($notify);
+    }
+
+    public function rejectThis(Request $request){
+        $proposalId = $request->route('proposalId');
+        QuoteProposals::where('id',$proposalId)
+        ->update(['proposal_status' => "Rejected"]);
+        $notify[] = ['success',"Proposal Rejected"];
         return back()->withNotify($notify);
     }
 

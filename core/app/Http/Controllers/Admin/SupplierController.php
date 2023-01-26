@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Suppliers;
 use Illuminate\Http\Request;
 use App\Models\OwnerDocuments;
+use App\Models\QuoteProposals;
+use App\Models\QuoteRequests;
+use Illuminate\Support\Facades\DB;
 class SupplierController extends Controller
 {
     public function index()
@@ -25,6 +28,16 @@ class SupplierController extends Controller
 
         $businessDocuments = OwnerDocuments::get();
         return view('admin.supplier.index', compact('pageTitle', 'suppliersApproved','suppliersRequested','businessDocuments'));
+    }
+    public function quoterequests()
+    {
+        $pageTitle = "Quote Requests";
+        $emptyMessage = 'No quote requests found';
+        $user = DB::select('select * from users');
+        $QuoteRequests = QuoteRequests::where('deleted', 0)->orderBy('created_at', 'desc')->get();
+        $QuoteProposals = QuoteProposals::where('deleted', 0)->orderBy('created_at', 'asc')->get();
+        $owners = DB::select('select * from owners');
+        return view('admin.quote_request.index', compact('owners','pageTitle','emptyMessage','user','QuoteRequests','QuoteProposals'));
     }
 
     public function activeThis(Request $request){

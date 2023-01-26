@@ -5,41 +5,94 @@
         <h6 class="d-inline">@lang('Your Quotes')</h6>
         <a href="javascript:void(0)" class="btn btn--base btn-sm float-end openNewQuote">@lang('Create a New Quote Request')</a>
     </div>
-    <div class="card-body">
-        <div class="table-responsive--md">
-            <div class="card-header pb-3">
-                <h6 class="d-inline">@lang('Property Waiting for Review')</h6>
-             </div>
-            <table class="table custom--table">
-                <thead>
-                    <tr>
-                        <th>@lang('Message')</th>
-                        <th>@lang('Document')</th>
-                        <th>@lang('Created Date')</th>
-                        <th>@lang('Action')</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {{-- @forelse ($quoteProposals as $proposal) --}}
-                    {{-- <tr>
-                        <td data-label="@lang('Property Name')">{{ $proposal->proposal_message }}</td>
-                        <td data-label="@lang('Property Name')">{{ $proposal->proposal_document }}</td>
-                        <td data-label="@lang('Property Name')">{{ ($proposal->created_at) }}</td>
-                        <td data-label="@lang('Action')">
-                            <button class="icon-btn"><i class="las la-star"></i></button>
-                        </td>
-                    </tr> --}}
-                    {{-- @empty --}}
-                    <tr>
-                        <td class="text-muted text-center" colspan="100%">{{ __($emptyMessage) }}</td>
-                    </tr>
-                    {{-- @endforelse --}}
-                </tbody>
-            </table>
+</div>
+<br/>
+    <?foreach($QuoteRequests as $value){
+    $timestamp = showDateTime($value['created_at']);
+    // $createdDate = date('F d, Y', $timestamp);    
+    $deadline = date('F d, Y',strtotime($value['quote_deadline']));
+    ?>
+    <div class="custom--card">
+        <div class="card-body">
+            <div class="table-responsive--md">
+                <div class="card-header pb-3">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">Quote</th>
+                                <th scope="col">Created Date</th>
+                                <th scope="col">Deadline</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td scope="row"><a target="_blank" href="https://booking.emphospitality.com/uploads/quote-files/<?=$value['quote_document']?>" class="d-inline"><?=$value["quote_title"]?></a></td>
+                                <td scope="row"><?=$timestamp?></td>
+                                <td scope="row"><?=$deadline?></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <table class="table custom--table">
+                    <thead>
+                        <tr>
+                            <th>@lang('Message')</th>
+                            <th>@lang('Document')</th>
+                            <th>@lang('Created Date')</th>
+                            <th>@lang('Status')</th>
+                            <th>@lang('Action')</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($QuoteProposals as $proposal)
+                        @if($proposal->quote_id==$value['id'])
+                        <tr>
+                            <td data-label="@lang('Proposal Message')">{{ $proposal->proposal_message }}</td>
+                            <td data-label="@lang('Proposal Document')">
+                                <a target="_blank" href="https://booking.emphospitality.com/uploads/proposals/{{ $proposal->proposal_document}}">@lang('Proposal Download')</a>
+                            </td>
+                            <td data-label="@lang('Proposal Created')">{{ showDateTime($proposal->created_at) }}</td>
+                            <td data-label="@lang('Proposal Created')">
+                                <strong>{{ ($proposal->proposal_status) }}</strong>
+                            </td>
+                            <td data-label="@lang('Action')">
+                                @if($proposal->proposal_status=="Pending" || $proposal->proposal_status=="Rejected" )
+                                <a href="{{ route('user.proposal.acceptThis', ['proposalId' => $proposal->id]) }}"
+                                    class="p-1 btn--success ml-1">Accept
+                                     <i class="las la-check-circle"></i>
+                                 </a>
+                                 @endif
+                                 @if($proposal->proposal_status=="Pending")
+                                 <a href="{{ route('user.proposal.rejectThis', ['proposalId' => $proposal->id]) }}"
+                                    class="p-1 btn--danger ml-1">Reject
+                                     <i class="las la-trash"></i>
+                                 </a>
+                                 @endif
+                                 @if($proposal->proposal_status=="Accepted")
+                                 @foreach($owners as $owner)
+                                 @if($proposal->owner_id==$owner->id)
+                                <?
+                                    $jsonAddress=json_decode($owner->address);
+                                    $address=$jsonAddress->address.', '.$jsonAddress->city.', '.$jsonAddress->state.', '.$jsonAddress->zip.', '.$jsonAddress->country;
+                                ?>
+                                <a href="javascript:void(0)" onclick="OwnerDetails('{{$owner->firstname}}','{{$owner->lastname}}','{{$owner->email}}','{{$owner->mobile}}','{{$address}}')"
+                                    class="p-1 btn--primary ml-1">see supplier details
+                                     <i class="las la-check-circle"></i>
+                                 </a>
+                                 @endif
+                                 @endforeach
+                                 @endif
+                            </td>
+                        </tr>
+                        @endif
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-</div>
-
+    <br/>
+    <?}?>
 @endsection
 
 @push('modal')
@@ -78,6 +131,51 @@
 </div>
 @endpush
 
+@push('modal')
+<div id="showOwner" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@lang('Supplier Details')</h5>
+                <button type="button" class="btn btn-sm btn--danger" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th colspan=2 scope="col">Your supplier details</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <th scope="row">First Name</th>
+                        <td id="fname">Mark</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">Last Name</th>
+                        <td id="lname" >Jacob</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">Email</th>
+                        <td id="email">Larry</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">Contact</th>
+                        <td id="contact">Larry</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">Address</th>
+                        <td id="address">Larry</td>
+                      </tr>
+                    </tbody>
+                  </table>
+            </div>
+        </div>
+    </div>
+</div>
+@endpush
 @push('style')
     <style>
         .rate {
@@ -137,5 +235,15 @@
             modal.modal('show');
         });
     })(jQuery);
+
+    OwnerDetails =  (fname,lname,email,contact,address) => {
+        $('#fname').html(fname);
+        $('#lname').html(lname);
+        $('#email').html(email);
+        $('#contact').html(contact);
+        $('#address').html(address);
+        var modal = $('#showOwner');
+        modal.modal('show');
+    }
 </script>
 @endpush

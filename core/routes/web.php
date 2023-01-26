@@ -196,6 +196,9 @@ Route::namespace('Admin')->prefix('admin')->name('admin.')->group(function () {
         Route::get('supplier/approve/{requestId}', 'SupplierController@approveThis')->name('supplier.approveThis');
         Route::get('supplier/reject/{requestId}', 'SupplierController@rejectThis')->name('supplier.rejectThis');
 
+        //Quote Request
+        Route::get('quoterequests', 'SupplierController@quoterequests')->name('quoterequests.index');
+
         // Deposit Gateway
         Route::name('gateway.')->prefix('gateway')->group(function(){
             // Automatic Gateway
@@ -454,7 +457,7 @@ Route::namespace('Owner')->prefix('owner')->name('owner.')->group(function(){
 
             Route::get('/quoterequest', 'QuoteRequestController@quoteRequest')->name('quote_request.quote');
             Route::post('quoterequest', 'QuoteRequestController@supplierRequest')->name('supplier.request');
-
+            Route::post('quote/proposal', 'QuoteRequestController@sendProposal')->name('quote.proposal');
         });
 
     });
@@ -530,6 +533,9 @@ Route::name('user.')->prefix('user')->group(function () {
             //Quote Requests
             Route::get('quote_request', 'UserController@user_quote_request')->name('quote_request');
             Route::post('quote_request/create', 'UserController@user_quote_request_create')->name('quote.request.create');
+            Route::get('proposal/approve/{proposalId}', 'UserController@acceptThis')->name('proposal.acceptThis');
+            Route::get('proposal/reject/{proposalId}', 'UserController@rejectThis')->name('proposal.rejectThis');
+    
         });
     });
 });

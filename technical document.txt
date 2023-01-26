@@ -21,6 +21,7 @@ Model: QuoteRequests
     quote_deadline
     quote_document
     quote_status
+    deleted
     created_at
     updated_at
 
@@ -31,6 +32,8 @@ Model: QuoteProposals
     quote_id
     proposal_message
     proposal_document
+    proposal_status
+    deleted
     created_at
     updated_at
 
@@ -42,6 +45,7 @@ Model: Suppliers
     request_title
     approval_status
     request_message
+    deleted
     created_at
     updated_at
 
@@ -51,6 +55,7 @@ Model: OwnerDocuments
     owner_id
     document_title
     document_name
+    deleted
     created_at
     updated_at
 
