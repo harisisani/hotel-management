@@ -10,6 +10,7 @@ use App\Models\Review;
 use App\Models\QuoteRequests;
 use App\Models\QuoteProposals;
 use App\Models\SupportTicket;
+use App\Models\Location;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -275,39 +276,60 @@ class UserController extends Controller
         $emptyMessage = 'No quote requests found';
         $user = Auth::guard('owner')->user();
         $userId = auth()->user()->id;
+        $locations = Location::where('status', 1)->get();
         $QuoteRequests = QuoteRequests::where('created_by_user_id', $userId)->where('deleted', 0)->orderBy('created_at', 'desc')->get();
         $QuoteProposals = QuoteProposals::where('deleted', 0)->orderBy('created_at', 'asc')->get();
         $owners = DB::select('select * from owners');
-        return view($this->activeTemplate.'user.quote_request.index', compact('owners','pageTitle','emptyMessage','user','QuoteRequests','QuoteProposals'));
+        return view($this->activeTemplate.'user.quote_request.index', compact('owners','pageTitle','emptyMessage','user','QuoteRequests','QuoteProposals','locations'));
     }
 
     function user_quote_request_create(Request $request){
         $this->validate($request, [
-            'quote_document' => 'required',
             'quote_title' => 'required',
             'quote_deadline' => 'required',
+            'quote_location' => 'required',
+        ], [
+            'quote_title.required' => 'Please add a title',
+            'quote_deadline.required' => 'Please add a deadline',
+            'quote_location.required' => 'Please select a location',
         ]);
         if($request->hasFile('quote_document'))
         {
             $user = auth()->user()->id;
-            $file = $request->file('quote_document');
-            $extention = $file->getClientOriginalExtension();
-            $filename = '_'.time().'.'.$extention;
-            $folder = 'quote-files/';
-            $file->move('uploads/'.$folder, $filename);
+            $files = $request->file('quote_document');
+            $filenames = '';
+            foreach ($files as $index => $file) {
+                $extention = $file->getClientOriginalExtension();
+                $filename = ++$index.'_'.time().'.'.$extention;
+                $folder = 'quote-files/';
+                $file->move('uploads/'.$folder, $filename);
+                $filenames .= $filename . ',';
+            }
+            
             $quote = new QuoteRequests;
             // Assign values to the model's attributes using the request data
             $quote->created_by_user_id = $user;
             $quote->quote_title = $request->input('quote_title');
             $quote->quote_deadline = $request->input('quote_deadline'); 
+            $quote->quote_location = $request->input('quote_location'); 
             $quote->quote_status = 'Active';
-            $quote->quote_document = $filename;
+            $quote->quote_document = $filenames;
+            $quote->published_status = 1;
+            $quote->deleted = 0;
             // Save the model to the database
             $quote->save();
-            $notify[] = ['success', 'Quote Request Created Successfully'];
+            $notify[] = ['success', 'Quote Request Saved Successfully'];
         }else{
             $notify[] = ['error','Document upload failed'];
         }
+        return back()->withNotify($notify);
+    }
+
+    public function publishThis(Request $request){
+        $quoteId = $request->route('quoteId');
+        QuoteRequests::where('id',$quoteId)
+        ->update(['published_status' => 0]);
+        $notify[] = ['success',"Quote Request Sent"];
         return back()->withNotify($notify);
     }
 
@@ -324,6 +346,13 @@ class UserController extends Controller
         QuoteProposals::where('id',$proposalId)
         ->update(['proposal_status' => "Rejected"]);
         $notify[] = ['success',"Proposal Rejected"];
+        return back()->withNotify($notify);
+    }
+    public function markPaid(Request $request){
+        $proposalId = $request->route('proposalId');
+        QuoteProposals::where('id',$proposalId)
+        ->update(['payment_status' => "Payment Completed"]);
+        $notify[] = ['success',"Marked as Payment Completed"];
         return back()->withNotify($notify);
     }
 

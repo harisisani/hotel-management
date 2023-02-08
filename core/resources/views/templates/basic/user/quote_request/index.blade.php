@@ -1,3 +1,5 @@
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 @extends($activeTemplate.'layouts.master')
 @section('content')
 <div class="custom--card">
@@ -21,15 +23,45 @@
                             <tr>
                                 <th scope="col">Quote</th>
                                 <th scope="col">Created Date</th>
+                                <th scope="col">Locations</th>
                                 <th scope="col">Deadline</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Action</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td scope="row"><a target="_blank" href="https://booking.emphospitality.com/uploads/quote-files/<?=$value['quote_document']?>" class="d-inline"><?=$value["quote_title"]?></a></td>
+                                <td scope="row">
+                                    <?php
+                                    echo $value["quote_title"].'<br/>';
+                                    $files = explode(",", $value['quote_document']);
+                                    foreach($files as $index => $file){
+                                    if(!empty($file)){
+                                    ?>
+                                    <br/>
+                                    <a target="_blank" href="https://booking.emphospitality.com/uploads/quote-files/<?=$file?>" class="d-inline"><?='Document: '.++$index?></a>
+                                <?php
+                                    }}
+                                ?>
+                                </td>
                                 <td scope="row"><?=$timestamp?></td>
+                                <td scope="row"><?=(str_replace(",","<br/>",$value['quote_location']))?></td>
                                 <td scope="row"><?=$deadline?></td>
-                            </tr>
+                                <td scope="row">
+                                    <?=($value->published_status==0)? "Sent" : ""?>
+                                    <?=($value->published_status==1)? "Draft" : ""?>
+                                    <?=($value->published_status==2)? "Received" : ""?>
+                                    <?=($value->published_status==3)? "In Review" : ""?>
+                                </td>
+                                <td nowrap data-label="@lang('Action')">
+                                @if($value->published_status==1)
+                                    <a href="{{ route('user.quote.publish', ['quoteId' => $value->id]) }}">
+                                    <button class="p-1 btn--success ml-1">Send
+                                        <i class="las la-check-circle"></i>
+                                    </button>
+                                    </a>
+                                    @endif
+                                </tr>
                         </tbody>
                     </table>
                 </div>
@@ -52,20 +84,26 @@
                                 <a target="_blank" href="https://booking.emphospitality.com/uploads/proposals/{{ $proposal->proposal_document}}">@lang('Proposal Download')</a>
                             </td>
                             <td data-label="@lang('Proposal Created')">{{ showDateTime($proposal->created_at) }}</td>
-                            <td data-label="@lang('Proposal Created')">
-                                <strong>{{ ($proposal->proposal_status) }}</strong>
+                            <td style="text-align:left;" data-label="@lang('Proposal Created')">
+                                Proposal Status:&nbsp;<strong>{{ ($proposal->proposal_status) }}</strong>
+                                <br/>
+                                Supply Status:&nbsp;<strong>{{ ($proposal->supplier_status) }}</strong>
+                                <br/>
+                                Payment Status:&nbsp;<strong>{{ ($proposal->payment_status) }}</strong>
                             </td>
-                            <td data-label="@lang('Action')">
+                            <td nowrap data-label="@lang('Action')">
                                 @if($proposal->proposal_status=="Pending" || $proposal->proposal_status=="Rejected" )
-                                <a href="{{ route('user.proposal.acceptThis', ['proposalId' => $proposal->id]) }}"
-                                    class="p-1 btn--success ml-1">Accept
-                                     <i class="las la-check-circle"></i>
+                                <a href="{{ route('user.proposal.acceptThis', ['proposalId' => $proposal->id]) }}">
+                                    <button class="p-1 btn--success ml-1">Accept
+                                        <i class="las la-check-circle"></i>
+                                    </button>
                                  </a>
                                  @endif
                                  @if($proposal->proposal_status=="Pending")
-                                 <a href="{{ route('user.proposal.rejectThis', ['proposalId' => $proposal->id]) }}"
-                                    class="p-1 btn--danger ml-1">Reject
-                                     <i class="las la-trash"></i>
+                                 <a href="{{ route('user.proposal.rejectThis', ['proposalId' => $proposal->id]) }}">
+                                    <button class="p-1 btn--danger ml-1">Reject
+                                        <i class="las la-trash"></i>
+                                    </button>
                                  </a>
                                  @endif
                                  @if($proposal->proposal_status=="Accepted")
@@ -75,10 +113,17 @@
                                     $jsonAddress=json_decode($owner->address);
                                     $address=$jsonAddress->address.', '.$jsonAddress->city.', '.$jsonAddress->state.', '.$jsonAddress->zip.', '.$jsonAddress->country;
                                 ?>
-                                <a href="javascript:void(0)" onclick="OwnerDetails('{{$owner->firstname}}','{{$owner->lastname}}','{{$owner->email}}','{{$owner->mobile}}','{{$address}}')"
-                                    class="p-1 btn--primary ml-1">see supplier details
-                                     <i class="las la-check-circle"></i>
-                                 </a>
+                                @if($proposal->payment_status=="Pending")
+                                <a href="{{ route('user.proposal.markPaid', ['proposalId' => $proposal->id]) }}">
+                                    <button class="p-1 btn--success ml-1">mark as paid<i class="las la-check-circle"></i>
+                                     </button>
+                                </a>
+                                 <br/>
+                                 <br/>
+                                 @endif
+                                <button href="javascript:void(0)" onclick="OwnerDetails('{{$owner->firstname}}','{{$owner->lastname}}','{{$owner->email}}','{{$owner->mobile}}','{{$address}}')"
+                                    class="p-1 btn--primary ml-1">supplier details<i class="las la-check-circle"></i>
+                                 </button>
                                  @endif
                                  @endforeach
                                  @endif
@@ -108,22 +153,32 @@
             <form action="{{ route('user.quote.request.create') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-body">
-                    <label>@lang('Quote Title')</label>
+                    <label>@lang('Quote Title*')</label>
                     <div class="input-group has_append">
                         <input type="text" name="quote_title" class="form-control" placeholder="@lang('Enter Quote Title')">
                     </div>
-                    <label>@lang('Quote Deadline')</label>
+                    <label>@lang('Quote Deadline*')</label>
                     <div class="input-group has_append">
                         <input type="date" value="<?=date('Y-m-d')?>" name="quote_deadline" class="form-control" >
                     </div>
-                    <label>@lang('Quote Document')</label>
+                    <label>@lang('Quote Document(s)')</label>
                     <div class="input-group has_append">
-                        <input type="file" name="quote_document" class="form-control">
+                        <input type="file" name="quote_document[]" class="form-control" multiple>
+                    </div>
+                    <label>@lang('Locations*')</label>
+                    <div class="input-group has_append">
+                        <select id="locations" name="locations[]" multiple="multiple" class="js-example-basic-multiple" style="width:100%">
+                            {{-- <option value="">Select Location</option> --}}
+                            @foreach ($locations as $location)
+                                <option value="{{ $location->name }}">{{$location->name}}</option>
+                            @endforeach
+                        </select>
+                        <input type="hidden" name="quote_location">
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn--dark" data-bs-dismiss="modal">@lang('Close')</button>
-                    <button type="submit" class="btn btn--base">@lang('Submit')</button>
+                    <button type="submit" class="btn btn--base">@lang('Save')</button>
                 </div>
             </form>
         </div>
@@ -178,6 +233,13 @@
 @endpush
 @push('style')
     <style>
+        .select2-container{
+            z-index:10000000 !important;
+        }
+        .select2-container--default .select2-results>.select2-results__options {
+            max-height: 150px;
+            overflow-y: auto;
+        }
         .rate {
             float: left;
             height: 46px;
@@ -245,5 +307,28 @@
         var modal = $('#showOwner');
         modal.modal('show');
     }
+
+    setLocation = () =>{
+        var value="";
+        var locations = $('#locations').select2('data');
+        for(var i in locations){
+            value+=locations[i]['text']+",";
+        }
+        console.log(value);
+        $('input[name="quote_location"]').val(value);
+    }
+
+    $(document).ready(function() {
+        $('.js-example-basic-multiple').select2();
+
+        $('#locations').on('select2:select', function (e) {
+            setLocation();
+        });
+
+        $('#locations').on('select2:unselect', function (e) {
+            // Run your script on unselection
+            setLocation();
+        });
+    });
 </script>
 @endpush

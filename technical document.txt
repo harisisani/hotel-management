@@ -21,6 +21,8 @@ Model: QuoteRequests
     quote_deadline
     quote_document
     quote_status
+    quote_location
+    published_status
     deleted
     created_at
     updated_at
@@ -33,6 +35,8 @@ Model: QuoteProposals
     proposal_message
     proposal_document
     proposal_status
+    supplier_status
+    payment_status
     deleted
     created_at
     updated_at

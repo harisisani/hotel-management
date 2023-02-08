@@ -40,13 +40,39 @@ class QuoteRequestController extends Controller
         $supplierRequests = Suppliers::where('owner_id', $ownerId)->get();
         $emptyMessage = 'No quote requests found';
         // $QuoteRequests = QuoteRequests::whereDate('quote_deadline','>=',DB::raw('CURRENT_DATE'))->orderBy('created_at', 'desc')->get();
-        $QuoteRequests = QuoteRequests::whereDate('quote_deadline','>=',DB::raw('CURRENT_DATE'))
-            ->orderBy('created_at', 'desc')->get();
         $QuoteProposals = QuoteProposals::where('owner_id', $ownerId)->orderBy('created_at', 'asc')->get();
         $supplierApproved = Suppliers::where('owner_id', $ownerId)->where('approval_status', 'Active')->get();
         $supplierDeactivated = Suppliers::where('owner_id', $ownerId)->where('approval_status', 'Deactivate')->get();
         // $OwnerDocuments = OwnerDocuments::get();
         $users = DB::select('select * from users');
+        $properties = Property::with('location')->where('owner_id', Auth::guard('owner')->id())->orderBy('id', 'DESC')->paginate(getPaginate());
+        $locations=array();
+        foreach($properties as $property){
+            array_push($locations,$property['location']->name);
+        }
+        $QuoteRequests = QuoteRequests::whereDate('quote_deadline','>=',DB::raw('CURRENT_DATE'))
+            ->where(function ($query) use ($locations) {
+                foreach ($locations as $location) {
+                    $query->orWhere('quote_location', 'like', "%$location%");
+                }
+            })
+            ->where('deleted', 0)
+            ->where(function ($query) {
+                $query->where('published_status', 0)
+                      ->orWhere('published_status', 2);
+            })
+            ->orderBy('created_at', 'desc')->get();
+
+
+            QuoteRequests::whereDate('quote_deadline', '>=', DB::raw('CURRENT_DATE'))
+            ->where(function ($query) use ($locations) {
+                foreach ($locations as $location) {
+                    $query->orWhere('quote_location', 'like', "%$location%");
+                }
+            })
+            ->where('deleted', 0)
+            ->where('published_status', 0)
+            ->update(['published_status' => 2]);
         return view('owner.quote_request.quote', compact('users','pageTitle', 'owner','OwnerDocuments','supplierRequests','supplierApproved','supplierDeactivated','QuoteRequests','QuoteProposals','emptyMessage'));
     }
 
@@ -125,4 +151,13 @@ class QuoteRequestController extends Controller
         $notify[] = ['success', 'Proposal submitted sucessfully'];
         return back()->withNotify($notify);
     }
+
+    public function markSupplied(Request $request){
+        $proposalId = $request->route('proposalId');
+        QuoteProposals::where('id',$proposalId)
+        ->update(['supplier_status' => "Supplied"]);
+        $notify[] = ['success',"Marked as Supplied"];
+        return back()->withNotify($notify);
+    }
+
 }

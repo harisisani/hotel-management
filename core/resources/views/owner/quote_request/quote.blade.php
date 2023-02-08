@@ -34,8 +34,6 @@ if(count($supplierDeactivated)<1){
                                     <i style="color:#f44336" class="fa fa-times">&emsp;@lang('Complete Your Profile')</i>
                                 </a>
                             <?}?>
-                            
-                            
                         </li>
                     </ul>
                     {{-- <br/> --}}
@@ -50,7 +48,7 @@ if(count($supplierDeactivated)<1){
                     </ul>
                     <?if($profileFilled=="yes"){?>
                         <form action="{{ route('owner.supplier.request') }}" method="POST" enctype="multipart/form-data">
-                            @csrf
+                             @csrf
                             <div class="row" style="padding:25px;">
                                 <div class="col-md-6">
                                     <div class="form-group">
@@ -165,6 +163,7 @@ if(count($supplierDeactivated)<1){
                                     <th>@lang('Quote Title')</th>
                                     <th>@lang('Quote Deadline')</th>
                                     <th>@lang('Quote Created')</th>
+                                    <th>@lang('Locations')</th>
                                     <th>@lang('Action')</th>
                                 </tr>
                             </thead>
@@ -175,6 +174,7 @@ if(count($supplierDeactivated)<1){
                                         <td data-label="@lang('Quote Title')"> <a target="_blank" href="https://booking.emphospitality.com/uploads/quote-files/{{ $quote->quote_document}}">{{ $quote->quote_title}}</a></td>
                                         <td data-label="@lang('Quote Deadline')"><?=date('F d, Y',strtotime($quote->quote_deadline))?></td>
                                         <td data-label="@lang('Quote Created')">{{ showDateTime($quote->created_at) }}</td>
+                                        <td data-label="@lang('Location')">{{ (str_replace(","," | ",$quote->quote_location)) }}</td>
                                         <td data-label="@lang('Action')">
                                             <a href="javascript:void(0)" data-value="<?=$quote->id?>" class="icon-btn ml-1 submitProposal"><i class="la la-pen"></i></i>Send Proposal</a>
                                         </td>
@@ -203,7 +203,7 @@ if(count($supplierDeactivated)<1){
         <div class="col-lg-12">
             <div class="card b-radius--10 ">
                 <div class="card-body p-0">
-                    <div class="table-responsive--md  table-responsive">
+                    <div style="overflow-y:hidden;" class="table-responsive--md  table-responsive">
                         <table class="table table--light style--two">
                         @forelse($QuoteRequests as $quote)
                             <thead>
@@ -216,7 +216,6 @@ if(count($supplierDeactivated)<1){
                                     <th>@lang('Quote Created')</th>
                                     <td  style="vertical-align: bottom;text-align:left;" data-label="@lang('Quote Created')">{{ showDateTime($quote->created_at) }}</td>
                                 </tr>  
-                                @endif 
                                     @foreach ($QuoteProposals as $proposal)
                                     @if($proposal->quote_id == $quote->id)
                                     <tr>
@@ -226,12 +225,22 @@ if(count($supplierDeactivated)<1){
                                             <br/>
                                             <br/>
                                             <a target="_blank" href="https://booking.emphospitality.com/uploads/proposals/{{ $proposal->proposal_document}}">@lang('Proposal Download')</a>
+                                            <br/>
+                                            <br/>
+                                            Date Created:&nbsp;{{ showDateTime($proposal->created_at) }}
                                         </td>
-                                        <th>@lang('Proposal Created')</th>
-                                        <td  style="vertical-align: bottom;text-align:left;" data-label="@lang('Proposal Created')">{{ showDateTime($proposal->created_at) }}</td>
-                                        <th>@lang('Status')</th>
+                                        <th>@lang('Statuses')</th>
+                                        <td  style="vertical-align: bottom;text-align:left;" data-label="@lang('Statuses')">
+                                            Proposal Status:&nbsp;<strong>{{$proposal->proposal_status}}</strong>
+                                            <br/>
+                                            <br/>
+                                            Supply Status:&nbsp;<strong>{{$proposal->supplier_status}}</strong>
+                                            <br/>
+                                            <br/>
+                                            Payment Status:&nbsp;<strong>{{$proposal->payment_status}}</strong>
+                                        </td>
+                                        <th>@lang('Action')</th>
                                         <td style="vertical-align: bottom;text-align:left;" data-label="@lang('Action')">
-                                            {{$proposal->proposal_status}}
                                              @if($proposal->proposal_status=="Accepted")
                                              @foreach($users as $user)
                                              @if($user->id==$quote->created_by_user_id)
@@ -239,8 +248,14 @@ if(count($supplierDeactivated)<1){
                                                 $jsonAddress=json_decode($user->address);
                                                 $address=$jsonAddress->address.', '.$jsonAddress->city.', '.$jsonAddress->state.', '.$jsonAddress->zip.', '.$jsonAddress->country;
                                             ?>
+                                            @if($proposal->supplier_status=="Pending")
+                                           <a href="{{ route('owner.proposal.markSupplied', ['proposalId' => $proposal->id]) }}"
+                                            class="p-1 btn--success ml-1">mark as supplied
+                                                <i class="las la-check-circle"></i>
+                                            </a>
                                             <br/>
-                                            <br/>
+                                             <br/>
+                                             @endif
                                             <a href="javascript:void(0)" onclick="UserDetails('{{$user->firstname}}','{{$user->lastname}}','{{$user->email}}','{{$user->mobile}}','{{$address}}')"
                                                 class="p-1 btn--primary ml-1">see customer details
                                                  <i class="las la-check-circle"></i>
@@ -251,9 +266,12 @@ if(count($supplierDeactivated)<1){
                                         </td>
                                     </tr>
                                     @endif
-                                    @endforeach   
-                                
+                                    @endforeach
                             </thead>
+                            <tr>
+                                <td colspan="6">&nbsp;</td>
+                            </tr>
+                            @endif
                             <tbody>
                                 @empty
                                     <tr>
@@ -380,4 +398,3 @@ if(count($supplierDeactivated)<1){
     </div>
 <?}?>
 @endsection
-

@@ -458,6 +458,8 @@ Route::namespace('Owner')->prefix('owner')->name('owner.')->group(function(){
             Route::get('/quoterequest', 'QuoteRequestController@quoteRequest')->name('quote_request.quote');
             Route::post('quoterequest', 'QuoteRequestController@supplierRequest')->name('supplier.request');
             Route::post('quote/proposal', 'QuoteRequestController@sendProposal')->name('quote.proposal');
+            Route::get('marksupplied/{proposalId}', 'QuoteRequestController@markSupplied')->name('proposal.markSupplied');
+       
         });
 
     });
@@ -533,8 +535,10 @@ Route::name('user.')->prefix('user')->group(function () {
             //Quote Requests
             Route::get('quote_request', 'UserController@user_quote_request')->name('quote_request');
             Route::post('quote_request/create', 'UserController@user_quote_request_create')->name('quote.request.create');
+            Route::get('quote/publish/{quoteId}', 'UserController@publishThis')->name('quote.publish');
             Route::get('proposal/approve/{proposalId}', 'UserController@acceptThis')->name('proposal.acceptThis');
             Route::get('proposal/reject/{proposalId}', 'UserController@rejectThis')->name('proposal.rejectThis');
+            Route::get('proposal/markPaid/{proposalId}', 'UserController@markPaid')->name('proposal.markPaid');
     
         });
     });

@@ -28,7 +28,6 @@
         <div class="container pt-50">
             <div class="row">
                 <div class="col-lg-8">
-
                     <ul class="nav hotel-nav">
                         <li class="hotel-nav__item">
                             <button class="nav-link w-100 hotel-nav__btn active" data-bs-toggle="pill"
