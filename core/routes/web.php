@@ -454,6 +454,8 @@ Route::namespace('Owner')->prefix('owner')->name('owner.')->group(function(){
                 Route::post('/reply/{ticket}', 'TicketController@replyTicket')->name('ticket.reply');
                 Route::get('/download/{ticket}', 'TicketController@ticketDownload')->name('ticket.download');
             });
+            Route::get('proposal/sent/{proposalId}', 'QuoteRequestController@sentThis')->name('proposal.sent');
+            Route::get('proposal/delete/{proposalId}', 'QuoteRequestController@deleteThis')->name('proposal.delete');
 
             Route::get('/quoterequest', 'QuoteRequestController@quoteRequest')->name('quote_request.quote');
             Route::post('quoterequest', 'QuoteRequestController@supplierRequest')->name('supplier.request');
@@ -536,10 +538,11 @@ Route::name('user.')->prefix('user')->group(function () {
             Route::get('quote_request', 'UserController@user_quote_request')->name('quote_request');
             Route::post('quote_request/create', 'UserController@user_quote_request_create')->name('quote.request.create');
             Route::get('quote/publish/{quoteId}', 'UserController@publishThis')->name('quote.publish');
+            Route::get('quote/delete/{quoteId}', 'UserController@deleteThis')->name('quote.delete');
             Route::get('proposal/approve/{proposalId}', 'UserController@acceptThis')->name('proposal.acceptThis');
             Route::get('proposal/reject/{proposalId}', 'UserController@rejectThis')->name('proposal.rejectThis');
             Route::get('proposal/markPaid/{proposalId}', 'UserController@markPaid')->name('proposal.markPaid');
-    
+            Route::post('quote_status/create', 'UserController@addStatus')->name('quote.status.create');
         });
     });
 });

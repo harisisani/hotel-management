@@ -23,7 +23,18 @@ Model: QuoteRequests
     quote_status
     quote_location
     published_status
-    deleted
+        published_status==0 "Sent"
+        published_status==1 "Draft"
+        published_status==2 "Received"
+        published_status==3 "In Review"
+        published_status==4 "Awarded"
+        published_status==5 "Rejected"
+        published_status==6 "Commitment"
+        published_status==7 "Checked In"
+        published_status==8 "Checked Out"
+        published_status==9 "Payment"
+        published_status==10 "Deadline Expired"
+deleted
     created_at
     updated_at
 
@@ -31,6 +42,7 @@ Table: quote_proposals
 Model: QuoteProposals
     id
     owner_id
+    created_by_user_id
     quote_id
     proposal_message
     proposal_document
@@ -41,6 +53,17 @@ Model: QuoteProposals
     created_at
     updated_at
 
+Table: quote_proposals_statuses
+Model: QuoteProposalsStatuses
+    id
+    created_by_user_id
+    quote_proposal_id
+    status_message
+    status_type
+    status_document
+    deleted
+    created_at
+    updated_at
 
 Table: suppliers
 Model: Suppliers
@@ -62,4 +85,3 @@ Model: OwnerDocuments
     deleted
     created_at
     updated_at
-

@@ -7,6 +7,7 @@ use App\Models\Suppliers;
 use Illuminate\Http\Request;
 use App\Models\OwnerDocuments;
 use App\Models\QuoteProposals;
+use App\Models\QuoteProposalsStatuses;
 use App\Models\QuoteRequests;
 use Illuminate\Support\Facades\DB;
 class SupplierController extends Controller
@@ -37,7 +38,10 @@ class SupplierController extends Controller
         $QuoteRequests = QuoteRequests::where('deleted', 0)->orderBy('created_at', 'desc')->get();
         $QuoteProposals = QuoteProposals::where('deleted', 0)->orderBy('created_at', 'asc')->get();
         $owners = DB::select('select * from owners');
-        return view('admin.quote_request.index', compact('owners','pageTitle','emptyMessage','user','QuoteRequests','QuoteProposals'));
+        $QuoteProposalsStatuses = QuoteProposalsStatuses::
+        where('deleted', 0)
+        ->orderBy('created_at', 'asc')->get();
+        return view('admin.quote_request.index', compact('QuoteProposalsStatuses','owners','pageTitle','emptyMessage','user','QuoteRequests','QuoteProposals'));
     }
 
     public function activeThis(Request $request){

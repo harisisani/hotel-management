@@ -171,12 +171,24 @@ if(count($supplierDeactivated)<1){
                                 @forelse($QuoteRequests as $quote)
                                 @if(!in_array($quote->id,$submittedProposals))
                                     <tr>
-                                        <td data-label="@lang('Quote Title')"> <a target="_blank" href="https://booking.emphospitality.com/uploads/quote-files/{{ $quote->quote_document}}">{{ $quote->quote_title}}</a></td>
+                                        <td data-label="@lang('Quote Title')">
+                                            <?php
+                                            echo $quote["quote_title"].'<br/>';
+                                            $files = explode(",", $quote['quote_document']);
+                                            foreach($files as $index => $file){
+                                            if(!empty($file)){
+                                            ?>
+                                            <br/>
+                                            <a target="_blank" href="https://booking.emphospitality.com/uploads/quote-files/<?=$file?>" class="d-inline"><?='Document: '.++$index?></a>
+                                        <?php
+                                            }}
+                                        ?>
+                                        </td>
                                         <td data-label="@lang('Quote Deadline')"><?=date('F d, Y',strtotime($quote->quote_deadline))?></td>
                                         <td data-label="@lang('Quote Created')">{{ showDateTime($quote->created_at) }}</td>
                                         <td data-label="@lang('Location')">{{ (str_replace(","," | ",$quote->quote_location)) }}</td>
                                         <td data-label="@lang('Action')">
-                                            <a href="javascript:void(0)" data-value="<?=$quote->id?>" class="icon-btn ml-1 submitProposal"><i class="la la-pen"></i></i>Send Proposal</a>
+                                            <a href="javascript:void(0)" data-value="<?= $quote->id.'^'.$quote->created_by_user_id ?>" class="icon-btn ml-1 submitProposal"><i class="la la-pen"></i></i>Send Proposal</a>
                                         </td>
                                     </tr>
                                 @endif 
@@ -210,7 +222,19 @@ if(count($supplierDeactivated)<1){
                                 @if(in_array($quote->id,$submittedProposals))
                                 <tr>
                                     <th>@lang('Quote Title')</th>
-                                    <td  style="vertical-align: bottom;text-align:left;" data-label="@lang('Quote Title')"> <a target="_blank" href="https://booking.emphospitality.com/uploads/quote-files/{{ $quote->quote_document}}">{{ $quote->quote_title}}</a></td>
+                                    <td style="vertical-align: bottom;text-align:left;"  data-label="@lang('Quote Title')">
+                                        <?php
+                                        echo $quote["quote_title"].'<br/>';
+                                        $files = explode(",", $quote['quote_document']);
+                                        foreach($files as $index => $file){
+                                        if(!empty($file)){
+                                        ?>
+                                        <br/>
+                                        <a target="_blank" href="https://booking.emphospitality.com/uploads/quote-files/<?=$file?>" class="d-inline"><?='Document: '.++$index?></a>
+                                    <?php
+                                        }}
+                                    ?>
+                                    </td>
                                     <th>@lang('Quote Deadline')</th>
                                     <td  style="vertical-align: bottom;text-align:left;" data-label="@lang('Quote Deadline')"><?=date('F d, Y',strtotime($quote->quote_deadline))?></td>
                                     <th>@lang('Quote Created')</th>
@@ -230,32 +254,64 @@ if(count($supplierDeactivated)<1){
                                             Date Created:&nbsp;{{ showDateTime($proposal->created_at) }}
                                         </td>
                                         <th>@lang('Statuses')</th>
-                                        <td  style="vertical-align: bottom;text-align:left;" data-label="@lang('Statuses')">
-                                            Proposal Status:&nbsp;<strong>{{$proposal->proposal_status}}</strong>
+                                        <td style="text-align:left;" data-label="@lang('Proposal Created')">
+                                            <strong>Proposal Status:</strong>&nbsp;{{ ($proposal->proposal_status) }}
+                                            {{-- <br/>
+                                            Supply Status:&nbsp;<strong>{{ ($proposal->supplier_status) }}</strong>
                                             <br/>
-                                            <br/>
-                                            Supply Status:&nbsp;<strong>{{$proposal->supplier_status}}</strong>
-                                            <br/>
-                                            <br/>
-                                            Payment Status:&nbsp;<strong>{{$proposal->payment_status}}</strong>
+                                            Payment Status:&nbsp;<strong>{{ ($proposal->payment_status) }}</strong> --}}
+                                            <?php
+                                            $quote_status=array();
+                                            foreach( $QuoteProposalsStatuses as $status){
+                                               if($status->quote_proposal_id == $proposal->id){
+                                                   $quote_status[]=array(
+                                                      'status_type' => $status['status_type'],
+                                                      'status_document' => $status['status_document'],
+                                                   );
+                                               }
+                                            }
+                                            if(count($quote_status)>0){?>
+                                            <br/><br/><strong>Service Status:</strong>
+                                            <?php
+                                            foreach($quote_status as $quoteStatus){
+                                               if(!empty($quoteStatus['status_document'])){
+                                                   echo '<br/><a target="_blank" href="https://booking.emphospitality.com/uploads/proposals/statuses/'.$quoteStatus['status_document'].'">'.$quoteStatus['status_type'].'</a>';
+                                               }else{
+                                                   echo '<br/>'.$quoteStatus['status_type'];
+                                               }
+                                            }
+                                            }
+                                            ?>
                                         </td>
                                         <th>@lang('Action')</th>
                                         <td style="vertical-align: bottom;text-align:left;" data-label="@lang('Action')">
-                                             @if($proposal->proposal_status=="Accepted")
+                                            @if($proposal->proposal_status=="Draft")
+                                            <a href="{{ route('owner.proposal.sent', ['proposalId' => $proposal->id]) }}">
+                                            <button class="p-1 btn--success ml-1">Send
+                                                <i class="las la-check-circle"></i>
+                                            </button>
+                                            </a>
+                                            <a href="{{ route('owner.proposal.delete', ['proposalId' => $proposal->id]) }}">
+                                            <button class="p-1 btn--danger ml-1">Delete
+                                                <i class="las la-exclamation-triangle"></i>
+                                            </button>
+                                            </a>
+                                            @endif
+                                             @if($proposal->proposal_status=="Awarded")
                                              @foreach($users as $user)
                                              @if($user->id==$quote->created_by_user_id)
                                             <?
                                                 $jsonAddress=json_decode($user->address);
                                                 $address=$jsonAddress->address.', '.$jsonAddress->city.', '.$jsonAddress->state.', '.$jsonAddress->zip.', '.$jsonAddress->country;
                                             ?>
-                                            @if($proposal->supplier_status=="Pending")
+                                            {{-- @if($proposal->supplier_status=="Pending")
                                            <a href="{{ route('owner.proposal.markSupplied', ['proposalId' => $proposal->id]) }}"
                                             class="p-1 btn--success ml-1">mark as supplied
                                                 <i class="las la-check-circle"></i>
                                             </a>
                                             <br/>
                                              <br/>
-                                             @endif
+                                             @endif --}}
                                             <a href="javascript:void(0)" onclick="UserDetails('{{$user->firstname}}','{{$user->lastname}}','{{$user->email}}','{{$user->mobile}}','{{$address}}')"
                                                 class="p-1 btn--primary ml-1">see customer details
                                                  <i class="las la-check-circle"></i>
@@ -302,6 +358,7 @@ if(count($supplierDeactivated)<1){
                         <div class="input-group has_append">
                             <textarea type="text" name="proposal_message" class="form-control" placeholder="@lang('Enter Proposal Message')"></textarea>
                             <input type="hidden" id="quoteId" name="quote_id" class="form-control" placeholder="@lang('Enter Quote Id')">
+                            <input type="hidden" id="created_by_user_id" name="created_by_user_id" class="form-control" placeholder="@lang('Enter Created by User Id')">
                         </div>
                         <label>@lang('Proposal Document')</label>
                         <div class="input-group has_append">
@@ -364,8 +421,9 @@ if(count($supplierDeactivated)<1){
         (function ($) {
             "use strict";
             $('.submitProposal').click(function () {
-                var value = $(this).data('value');
-                $('#quoteId').val(value);
+                var value = $(this).data('value').split("^");
+                $('#quoteId').val(value[0]);
+                $('#created_by_user_id').val(value[1]);
                 var modal = $('#submitProposalModal');
                 modal.modal('show');
             });

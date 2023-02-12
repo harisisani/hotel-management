@@ -12,6 +12,7 @@ use App\Models\OwnerDocuments;
 use App\Models\Suppliers;
 use App\Models\QuoteRequests;
 use App\Models\QuoteProposals;
+use App\Models\QuoteProposalsStatuses;
 use App\Models\RoomCategory;
 use App\Models\Transaction;
 use App\Models\Withdrawal;
@@ -40,7 +41,7 @@ class QuoteRequestController extends Controller
         $supplierRequests = Suppliers::where('owner_id', $ownerId)->get();
         $emptyMessage = 'No quote requests found';
         // $QuoteRequests = QuoteRequests::whereDate('quote_deadline','>=',DB::raw('CURRENT_DATE'))->orderBy('created_at', 'desc')->get();
-        $QuoteProposals = QuoteProposals::where('owner_id', $ownerId)->orderBy('created_at', 'asc')->get();
+        $QuoteProposals = QuoteProposals::where('owner_id', $ownerId)->where('deleted', 0)->orderBy('created_at', 'asc')->get();
         $supplierApproved = Suppliers::where('owner_id', $ownerId)->where('approval_status', 'Active')->get();
         $supplierDeactivated = Suppliers::where('owner_id', $ownerId)->where('approval_status', 'Deactivate')->get();
         // $OwnerDocuments = OwnerDocuments::get();
@@ -59,7 +60,10 @@ class QuoteRequestController extends Controller
             ->where('deleted', 0)
             ->where(function ($query) {
                 $query->where('published_status', 0)
-                      ->orWhere('published_status', 2);
+                      ->orWhere('published_status', 2)
+                      ->orWhere('published_status', 3)
+                      ->orWhere('published_status', 4)
+                      ->orWhere('published_status', 5);
             })
             ->orderBy('created_at', 'desc')->get();
 
@@ -73,7 +77,11 @@ class QuoteRequestController extends Controller
             ->where('deleted', 0)
             ->where('published_status', 0)
             ->update(['published_status' => 2]);
-        return view('owner.quote_request.quote', compact('users','pageTitle', 'owner','OwnerDocuments','supplierRequests','supplierApproved','supplierDeactivated','QuoteRequests','QuoteProposals','emptyMessage'));
+
+        $QuoteProposalsStatuses = QuoteProposalsStatuses::
+        where('deleted', 0)
+        ->orderBy('created_at', 'asc')->get();
+        return view('owner.quote_request.quote', compact('QuoteProposalsStatuses','users','pageTitle', 'owner','OwnerDocuments','supplierRequests','supplierApproved','supplierDeactivated','QuoteRequests','QuoteProposals','emptyMessage'));
     }
 
 
@@ -143,12 +151,33 @@ class QuoteRequestController extends Controller
         $file->move(('uploads/proposals'), $fileName);
         $proposal = new QuoteProposals;
         $proposal->owner_id = $ownerId;
+        $proposal->created_by_user_id = $request->created_by_user_id;
         $proposal->quote_id = $request->quote_id;
         $proposal->proposal_message = $request->proposal_message;
         $proposal->proposal_document = $fileName;
-        $proposal-> proposal_status = "Pending";
+        $proposal-> proposal_status = "Draft";
         $proposal->save();
+
+        QuoteRequests::where('id', $request->quote_id)
+        ->update(['published_status' => 3]);
+
         $notify[] = ['success', 'Proposal submitted sucessfully'];
+        return back()->withNotify($notify);
+    }
+
+    public function deleteThis(Request $request){
+        $proposalId = $request->route('proposalId');
+        QuoteProposals::where('id',$proposalId)
+        ->update(['deleted' => 1]);
+        $notify[] = ['success',"Proposal Deleted"];
+        return back()->withNotify($notify);
+    }
+
+    public function sentThis(Request $request){
+        $proposalId = $request->route('proposalId');
+        QuoteProposals::where('id',$proposalId)
+        ->update(['proposal_status' => "Sent"]);
+        $notify[] = ['success',"Proposal Sent"];
         return back()->withNotify($notify);
     }
 

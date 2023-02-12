@@ -52,12 +52,24 @@
                                     <?=($value->published_status==1)? "Draft" : ""?>
                                     <?=($value->published_status==2)? "Received" : ""?>
                                     <?=($value->published_status==3)? "In Review" : ""?>
+                                    <?=($value->published_status==4)? "Awarded" : ""?>
+                                    <?=($value->published_status==5)? "Rejected" : ""?>
+                                    <?=($value->published_status==6)? "Commitment" : ""?>
+                                    <?=($value->published_status==7)? "Checked In" : ""?>
+                                    <?=($value->published_status==8)? "Checked Out" : ""?>
+                                    <?=($value->published_status==9)? "Payment" : ""?>
+                                    <?=($value->published_status==10)? "Deadline Expired" : ""?>
                                 </td>
                                 <td nowrap data-label="@lang('Action')">
                                 @if($value->published_status==1)
                                     <a href="{{ route('user.quote.publish', ['quoteId' => $value->id]) }}">
                                     <button class="p-1 btn--success ml-1">Send
                                         <i class="las la-check-circle"></i>
+                                    </button>
+                                    </a>
+                                    <a href="{{ route('user.quote.delete', ['quoteId' => $value->id]) }}">
+                                    <button class="p-1 btn--danger ml-1">Delete
+                                        <i class="las la-exclamation-triangle"></i>
                                     </button>
                                     </a>
                                     @endif
@@ -85,44 +97,71 @@
                             </td>
                             <td data-label="@lang('Proposal Created')">{{ showDateTime($proposal->created_at) }}</td>
                             <td style="text-align:left;" data-label="@lang('Proposal Created')">
-                                Proposal Status:&nbsp;<strong>{{ ($proposal->proposal_status) }}</strong>
-                                <br/>
+                                <strong>Proposal Status:</strong>&nbsp;{{ ($proposal->proposal_status) }}
+                                {{-- <br/>
                                 Supply Status:&nbsp;<strong>{{ ($proposal->supplier_status) }}</strong>
                                 <br/>
-                                Payment Status:&nbsp;<strong>{{ ($proposal->payment_status) }}</strong>
+                                Payment Status:&nbsp;<strong>{{ ($proposal->payment_status) }}</strong> --}}
+                                <?php
+                                $quote_status=array();
+                                foreach( $QuoteProposalsStatuses as $status){
+                                   if($status->quote_proposal_id == $proposal->id){
+                                       $quote_status[]=array(
+                                          'status_type' => $status['status_type'],
+                                          'status_document' => $status['status_document'],
+                                       );
+                                   }
+                                }
+                                if(count($quote_status)>0){?>
+                                <br/><br/><strong>Service Status:</strong>
+                                <?php
+                                foreach($quote_status as $quoteStatus){
+                                   if(!empty($quoteStatus['status_document'])){
+                                       echo '<br/><a target="_blank" href="https://booking.emphospitality.com/uploads/proposals/statuses/'.$quoteStatus['status_document'].'">'.$quoteStatus['status_type'].'</a>';
+                                   }else{
+                                       echo '<br/>'.$quoteStatus['status_type'];
+                                   }
+                                }
+                                }
+                                ?>
                             </td>
                             <td nowrap data-label="@lang('Action')">
-                                @if($proposal->proposal_status=="Pending" || $proposal->proposal_status=="Rejected" )
+                                @if($proposal->proposal_status=="Sent" || $proposal->proposal_status=="Received" || $proposal->proposal_status=="Rejected" )
                                 <a href="{{ route('user.proposal.acceptThis', ['proposalId' => $proposal->id]) }}">
-                                    <button class="p-1 btn--success ml-1">Accept
+                                    <button class="p-1 btn--success ml-1">Award
                                         <i class="las la-check-circle"></i>
                                     </button>
                                  </a>
                                  @endif
-                                 @if($proposal->proposal_status=="Pending")
+                                 @if($proposal->proposal_status=="Sent" || $proposal->proposal_status=="Received")
                                  <a href="{{ route('user.proposal.rejectThis', ['proposalId' => $proposal->id]) }}">
                                     <button class="p-1 btn--danger ml-1">Reject
                                         <i class="las la-trash"></i>
                                     </button>
                                  </a>
                                  @endif
-                                 @if($proposal->proposal_status=="Accepted")
+                                 @if($proposal->proposal_status=="Awarded")
                                  @foreach($owners as $owner)
                                  @if($proposal->owner_id==$owner->id)
                                 <?
                                     $jsonAddress=json_decode($owner->address);
                                     $address=$jsonAddress->address.', '.$jsonAddress->city.', '.$jsonAddress->state.', '.$jsonAddress->zip.', '.$jsonAddress->country;
                                 ?>
-                                @if($proposal->payment_status=="Pending")
+                                {{-- @if($proposal->payment_status=="Pending")
                                 <a href="{{ route('user.proposal.markPaid', ['proposalId' => $proposal->id]) }}">
                                     <button class="p-1 btn--success ml-1">mark as paid<i class="las la-check-circle"></i>
                                      </button>
                                 </a>
                                  <br/>
                                  <br/>
-                                 @endif
+                                 @endif --}}
                                 <button href="javascript:void(0)" onclick="OwnerDetails('{{$owner->firstname}}','{{$owner->lastname}}','{{$owner->email}}','{{$owner->mobile}}','{{$address}}')"
                                     class="p-1 btn--primary ml-1">supplier details<i class="las la-check-circle"></i>
+                                 </button>
+                                 <br/>
+                                 <br/>
+                                 <button href="javascript:void(0)" onclick="openStatusModal({{$proposal->id}})"
+                                    class="p-1 btn--success ml-1">add a new status<i class="las la-check-circle"></i>
                                  </button>
                                  @endif
                                  @endforeach
@@ -139,6 +178,46 @@
     <br/>
     <?}?>
 @endsection
+
+@push('modal')
+<div id="addNewStatus" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@lang('Add a New Status')</h5>
+                <button type="button" class="btn btn-sm btn--danger" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="{{ route('user.quote.status.create') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-body">
+                    <label>@lang('Status Type*')</label>
+                    <div class="input-group has_append">
+                        <select onchange="setStatusType(this.value)" style="width:100%">
+                            <option value="">Select Status Type</option>
+                            <option value="Commitment">Commitment</option>
+                            <option value="Checked In">Checked In</option>
+                            <option value="Checked Out">Checked Out</option>
+                            <option value="Payment Completed">Payment Completed</option>
+                        </select>
+                        <input type="hidden" name="status_type">
+                        <input type="hidden" name="quote_proposal_id">
+                    </div>
+                    <label>@lang('Document')</label>
+                    <div class="input-group has_append">
+                        <input type="file" name="status_document" class="form-control">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn--dark" data-bs-dismiss="modal">@lang('Close')</button>
+                    <button type="submit" class="btn btn--base">@lang('Save')</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endpush
 
 @push('modal')
 <div id="starModal" class="modal fade" tabindex="-1" role="dialog">
@@ -231,6 +310,7 @@
     </div>
 </div>
 @endpush
+
 @push('style')
     <style>
         .select2-container{
@@ -298,6 +378,12 @@
         });
     })(jQuery);
 
+    openStatusModal =(quoteProposalId) => {
+        $('input[name="quote_proposal_id"]').val(quoteProposalId);
+        var modal = $('#addNewStatus');
+        modal.modal('show');
+    }
+
     OwnerDetails =  (fname,lname,email,contact,address) => {
         $('#fname').html(fname);
         $('#lname').html(lname);
@@ -314,8 +400,11 @@
         for(var i in locations){
             value+=locations[i]['text']+",";
         }
-        console.log(value);
         $('input[name="quote_location"]').val(value);
+    }
+
+    setStatusType = (value) => {
+        $('input[name="status_type"]').val(value);
     }
 
     $(document).ready(function() {

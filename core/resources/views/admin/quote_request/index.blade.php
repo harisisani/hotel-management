@@ -53,12 +53,34 @@
                                 <a target="_blank" href="https://booking.emphospitality.com/uploads/proposals/{{ $proposal->proposal_document}}">@lang('Proposal Download')</a>
                             </td>
                             <td data-label="@lang('Proposal Created')">{{ showDateTime($proposal->created_at) }}</td>
-                            <td style="text-align:left;" data-label="@lang('Proposal Status')">
-                                Proposal Status:&nbsp;<strong>{{ ($proposal->proposal_status) }}</strong>
-                                <br/>
+                            <td style="text-align:left;" data-label="@lang('Proposal Created')">
+                                <strong>Proposal Status:</strong>&nbsp;{{ ($proposal->proposal_status) }}
+                                {{-- <br/>
                                 Supply Status:&nbsp;<strong>{{ ($proposal->supplier_status) }}</strong>
                                 <br/>
-                                Payment Status:&nbsp;<strong>{{ ($proposal->payment_status) }}</strong>
+                                Payment Status:&nbsp;<strong>{{ ($proposal->payment_status) }}</strong> --}}
+                                <?php
+                                $quote_status=array();
+                                foreach( $QuoteProposalsStatuses as $status){
+                                   if($status->quote_proposal_id == $proposal->id){
+                                       $quote_status[]=array(
+                                          'status_type' => $status['status_type'],
+                                          'status_document' => $status['status_document'],
+                                       );
+                                   }
+                                }
+                                if(count($quote_status)>0){?>
+                                <br/><br/><strong>Service Status:</strong>
+                                <?php
+                                foreach($quote_status as $quoteStatus){
+                                   if(!empty($quoteStatus['status_document'])){
+                                       echo '<br/><a target="_blank" href="https://booking.emphospitality.com/uploads/proposals/statuses/'.$quoteStatus['status_document'].'">'.$quoteStatus['status_type'].'</a>';
+                                   }else{
+                                       echo '<br/>'.$quoteStatus['status_type'];
+                                   }
+                                }
+                                }
+                                ?>
                             </td>
                             <td>
                                 <a href="{{ route('admin.owners.detail', $proposal->owner_id) }}" class="icon-btn" data-toggle="tooltip" title="" data-original-title="@lang('Details')">
